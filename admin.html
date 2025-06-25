@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Voting - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .label {
+            font-size: 1.1rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card.vegetarian .number { color: #28a745; }
+        .stat-card.mutton .number { color: #dc3545; }
+        .stat-card.chicken .number { color: #ffc107; }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-export {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #138496;
+        }
+
+        .votes-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .votes-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .votes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .votes-table th,
+        .votes-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .votes-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            top: 0;
+        }
+
+        .votes-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .food-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .food-badge.vegetarian {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .food-badge.mutton {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .food-badge.chicken {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .votes-table {
+                font-size: 0.9rem;
+            }
+            
+            .votes-table th,
+            .votes-table td {
+                padding: 10px 8px;
+            }
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-label {
+            width: 100px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .chart-progress {
+            flex: 1;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+
+        .chart-fill {
+            height: 100%;
+            border-radius: 15px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-fill.vegetarian { background: #28a745; }
+        .chart-fill.mutton { background: #dc3545; }
+        .chart-fill.chicken { background: #ffc107; }
+
+        .chart-count {
+            font-weight: bold;
+            min-width: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Party Voting Dashboard</h1>
+            <p>Real-time voting results and participant management</p>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="number" id="totalVotes">-</div>
+                <div class="label">Total Votes</div>
+            </div>
+            <div class="stat-card vegetarian">
+                <div class="number" id="vegetarianCount">-</div>
+                <div class="label">Vegetarian</div>
+            </div>
+            <div class="stat-card mutton">
+                <div class="number" id="muttonCount">-</div>
+                <div class="label">Mutton</div>
+            </div>
+            <div class="stat-card chicken">
+                <div class="number" id="chickenCount">-</div>
+                <div class="label">Chicken</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>Food Preference Distribution</h3>
+            <div id="chartBars"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="refreshData()">
+                🔄 Refresh Data
+            </button>
+            <button class="btn btn-export" onclick="exportToCSV()">
+                📊 Export CSV
+            </button>
+            <button class="btn btn-success" onclick="copyVotingLink()">
+                📋 Copy Voting Link
+            </button>
+        </div>
+
+        <div class="votes-section">
+            <h2>All Votes</h2>
+            
+            <div class="loading" id="loadingDiv">
+                <div class="loading-spinner"></div>
+                <p>Loading votes...</p>
+            </div>
+
+            <div class="error-message" id="errorMessage" style="display: none;">
+                Failed to load data. Please try again.
+            </div>
+
+            <div id="votesContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_URL = 'https://party-voting-backend.azurewebsites.net/api'; // Replace with your actual API url
+        // const API_URL = 'http://localhost:3000/api'; // Replace with your actual API url
+        const VOTING_URL = window.location.origin; // Current domain for voting link
+
+        let allVotes = [];
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadData, 30000);
+        });
+
+        async function loadData() {
+            try {
+                const response = await fetch(`${API_URL}/votes`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+
+                const data = await response.json();
+                allVotes = data.votes;
+                
+                updateStats(data);
+                renderVotesTable(data.votes);
+                renderChart(data.summary);
+                
+                document.getElementById('loadingDiv').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loadingDiv').style.display = 'none';
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        function updateStats(data) {
+            const stats = {
+                total: data.totalVotes,
+                vegetarian: 0,
+                mutton: 0,
+                chicken: 0
+            };
+
+            // Calculate counts from summary
+            data.summary.forEach(item => {
+                stats[item.food_preference] = parseInt(item.count);
+            });
+
+            document.getElementById('totalVotes').textContent = stats.total;
+            document.getElementById('vegetarianCount').textContent = stats.vegetarian;
+            document.getElementById('muttonCount').textContent = stats.mutton;
+            document.getElementById('chickenCount').textContent = stats.chicken;
+        }
+
+        function renderChart(summary) {
+            const chartBars = document.getElementById('chartBars');
+            chartBars.innerHTML = '';
+
+            const total = summary.reduce((sum, item) => sum + parseInt(item.count), 0);
+
+            if (total === 0) {
+                chartBars.innerHTML = '<p style="text-align: center; color: #666;">No votes yet</p>';
+                return;
+            }
+
+            const foods = ['vegetarian', 'mutton', 'chicken'];
+            const colors = {
+                vegetarian: '#28a745',
+                mutton: '#dc3545',
+                chicken: '#ffc107'
+            };
+
+            foods.forEach(food => {
+                const item = summary.find(s => s.food_preference === food) || { count: 0 };
+                const count = parseInt(item.count);
+                const percentage = total > 0 ? (count / total) * 100 : 0;
+
+                const barHtml = `
+                    <div class="chart-bar">
+                        <div class="chart-label">${food}</div>
+                        <div class="chart-progress">
+                            <div class="chart-fill ${food}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="chart-count">${count}</div>
+                    </div>
+                `;
+                chartBars.innerHTML += barHtml;
+            });
+        }
+
+        function renderVotesTable(votes) {
+            const container = document.getElementById('votesContainer');
+            
+            if (votes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🗳️</div>
+                        <h3>No votes yet</h3>
+                        <p>Share the voting link to start collecting responses!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHtml = `
+                <table class="votes-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Food Preference</th>
+                            <th>Voted At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            votes.forEach((vote, index) => {
+                const date = new Date(vote.created_at);
+                const formattedDate = date.toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                tableHtml += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${escapeHtml(vote.name)}</strong></td>
+                        <td>
+                            <span class="food-badge ${vote.food_preference}">
+                                ${vote.food_preference}
+                            </span>
+                        </td>
+                        <td>${formattedDate}</td>
+                    </tr>
+                `;
+            });
+
+            tableHtml += '</tbody></table>';
+            container.innerHTML = tableHtml;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function refreshData() {
+            document.getElementById('loadingDiv').style.display = 'block';
+            loadData();
+        }
+
+        function exportToCSV() {
+            if (allVotes.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const headers = ['Serial No.', 'Name', 'Food Preference', 'Voted At'];
+            const csvContent = [
+                headers.join(','),
+                ...allVotes.map((vote, index) => {
+                    const date = new Date(vote.created_at);
+                    const formattedDate = date.toLocaleDateString('en-IN') + ' ' + date.toLocaleTimeString('en-IN');
+                    return [
+                        index + 1,
+                        `"${vote.name}"`,
+                        vote.food_preference,
+                        `"${formattedDate}"`
+                    ].join(',');
+                })
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `party-votes-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        async function copyVotingLink() {
+            try {
+                await navigator.clipboard.writeText(VOTING_URL);
+                
+                // Show temporary success message
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '#28a745';
+                }, 2000);
+                
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = VOTING_URL;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                alert('Voting link copied to clipboard!');
+            }
+        }
+
+        // For development/testing without backend
+        // if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        //     // Mock data for testing
+        //     const mockData = {
+        //         totalVotes: 15,
+        //         votes: [
+        //             { id: 1, name: 'John Doe', food_preference: 'chicken', created_at: new Date().toISOString() },
+        //             { id: 2, name: 'Jane Smith', food_preference: 'vegetarian', created_at: new Date().toISOString() },
+        //             { id: 3, name: 'Mike Johnson', food_preference: 'mutton', created_at: new Date().toISOString() },
+        //             { id: 4, name: 'Sarah Wilson', food_preference: 'vegetarian', created_at: new Date().toISOString() },
+        //             { id: 5, name: 'David Brown', food_preference: 'chicken', created_at: new Date().toISOString() }
+        //         ],
+        //         summary: [
+        //             { food_preference: 'chicken', count: '7' },
+        //             { food_preference: 'vegetarian', count: '5' },
+        //             { food_preference: 'mutton', count: '3' }
+        //         ]
+        //     };
+
+        //     // Override loadData for testing
+        //     window.loadData = function() {
+        //         allVotes = mockData.votes;
+        //         updateStats(mockData);
+        //         renderVotesTable(mockData.votes);
+        //         renderChart(mockData.summary);
+        //         document.getElementById('loadingDiv').style.display = 'none';
+        //     };
+        // }
+    </script>
+</body>
+</html>

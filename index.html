@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Party Food Preference Voting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .radio-option:hover {
+            border-color: #667eea;
+            background: white;
+        }
+
+        .radio-option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            accent-color: #667eea;
+        }
+
+        .radio-option .food-info {
+            flex: 1;
+        }
+
+        .radio-option .food-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .radio-option .food-emoji {
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .success-message h2 {
+            color: #28a745;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .venue-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .venue-details h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .venue-details p {
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .error-message {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .radio-option {
+                padding: 12px;
+            }
+            
+            .submit-btn {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="votingForm">
+            <div class="header">
+                <h1>🎉 Party Food Voting</h1>
+                <p>Help us plan the perfect party by voting for your preferred food option!</p>
+            </div>
+
+            <form id="partyForm">
+                <div class="form-group">
+                    <label for="userName">आपले नाव (नाव व आडनाव द्या) *</label>
+                    <input type="text" id="userName" name="userName" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label>Food Preference - आहार पसंती *</label>
+                    <div class="radio-group">
+                        <div class="radio-option" data-value="vegetarian">
+                            <input type="radio" id="veg" name="foodPreference" value="vegetarian" required>
+                            <div class="food-info">
+                                <div class="food-name">Vegetarian - शाकाहारी</div>
+                            </div>
+                            <div class="food-emoji">🥗</div>
+                        </div>
+                        
+                        <div class="radio-option" data-value="mutton">
+                            <input type="radio" id="mutton" name="foodPreference" value="mutton" required>
+                            <div class="food-info">
+                                <div class="food-name">Mutton - मटण</div>
+                            </div>
+                            <div class="food-emoji">🐑</div>
+                        </div>
+                        
+                        <div class="radio-option" data-value="chicken">
+                            <input type="radio" id="chicken" name="foodPreference" value="chicken" required>
+                            <div class="food-info">
+                                <div class="food-name">Chicken - चिकन</div>
+                            </div>
+                            <div class="food-emoji">🐔</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    Submit My Vote
+                </button>
+            </form>
+        </div>
+
+        <div class="loading" id="loadingDiv">
+            <div class="loading-spinner"></div>
+            <p>Submitting your vote...</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <h2>✅ आपला सहभाग नोंदविल्या बद्द्ल धन्यवाद!</h2>
+            <p>आपला फूड प्राधान्य यशस्वीरित्या संग्रहित झाला आहे.</p>
+            
+            <div class="venue-details">
+                <h3>📍 पार्टी स्थळाचे तपशील</h3>   
+                <p><strong>स्थळ:</strong> हॉटेल क्रांती </p>
+                <p><strong>पत्ता:</strong> उदगाव-शिरोळ रोड,उदगाव </p>
+                <p><strong>तारीख:</strong> २९, जून २०२५ </p>
+                <p><strong>वेळ:</strong> सायं. ७:३० वाजल्यापासून पुढे</p>
+                <p><strong>संपर्क:</strong> सुशांत-९९३०३३५६१८ / रशीद-९९२१५१७७२७</p>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage">
+            Something went wrong. Please try again later.
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_URL = 'https://party-voting-backend.azurewebsites.net/api'; // Replace with your actual API URL
+        // const API_URL = 'http://localhost:3000/api'; // Replace with your actual API URL
+
+        // DOM Elements
+        const form = document.getElementById('partyForm');
+        const votingForm = document.getElementById('votingForm');
+        const loadingDiv = document.getElementById('loadingDiv');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const radioOptions = document.querySelectorAll('.radio-option');
+
+        // Radio button styling
+        radioOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const radio = option.querySelector('input[type="radio"]');
+                radio.checked = true;
+                
+                // Update visual state
+                radioOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+            });
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const userName = formData.get('userName').trim();
+            const foodPreference = formData.get('foodPreference');
+
+            if (!userName || !foodPreference) {
+                showError('Please fill in all required fields.');
+                return;
+            }
+
+            // Show loading
+            votingForm.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}/vote`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: userName,
+                        foodPreference: foodPreference,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    // Show success message
+                    loadingDiv.style.display = 'none';
+                    successMessage.style.display = 'block';
+                } else {
+                    throw new Error('Failed to submit vote');
+                }
+            } catch (error) {
+                console.error('Error submitting vote:', error);
+                showError('Failed to submit your vote. Please try again.');
+            }
+        });
+
+        function showError(message) {
+            votingForm.style.display = 'block';
+            loadingDiv.style.display = 'none';
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        // For development/testing without backend
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Simulate API call
+                votingForm.style.display = 'none';
+                loadingDiv.style.display = 'block';
+                
+                setTimeout(() => {
+                    loadingDiv.style.display = 'none';
+                    successMessage.style.display = 'block';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

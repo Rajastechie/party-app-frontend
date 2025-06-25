@@ -1,0 +1,26 @@
+{
+  "routes": [
+    {
+      "route": "/admin",
+      "serve": "/admin.html"
+    },
+    {
+      "route": "/api/*",
+      "allowedRoles": [
+        "anonymous"
+      ]
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/admin.html",
+      "/api/*"
+    ]
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".js": "application/javascript",
+    ".css": "text/css"
+  }
+}
