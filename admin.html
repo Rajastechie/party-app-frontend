@@ -74,6 +74,7 @@
         .stat-card.vegetarian .number { color: #28a745; }
         .stat-card.mutton .number { color: #dc3545; }
         .stat-card.chicken .number { color: #ffc107; }
+        .stat-card.andakari .number { color: #997b03; }
 
         .controls {
             display: flex;
@@ -291,6 +292,7 @@
         .chart-fill.vegetarian { background: #28a745; }
         .chart-fill.mutton { background: #dc3545; }
         .chart-fill.chicken { background: #ffc107; }
+        .chart-fill.andakari { background: #997b03; }
 
         .chart-count {
             font-weight: bold;
@@ -321,6 +323,10 @@
             <div class="stat-card chicken">
                 <div class="number" id="chickenCount">-</div>
                 <div class="label">Chicken</div>
+            </div>
+            <div class="stat-card andakari">
+                <div class="number" id="andakariCount">-</div>
+                <div class="label">Andakari</div>
             </div>
         </div>
 
@@ -403,7 +409,8 @@
                 total: data.totalVotes,
                 vegetarian: 0,
                 mutton: 0,
-                chicken: 0
+                chicken: 0,
+                andakari: 0
             };
 
             // Calculate counts from summary
@@ -415,6 +422,7 @@
             document.getElementById('vegetarianCount').textContent = stats.vegetarian;
             document.getElementById('muttonCount').textContent = stats.mutton;
             document.getElementById('chickenCount').textContent = stats.chicken;
+            document.getElementById('andakariCount').textContent = stats.andakari;
         }
 
         function renderChart(summary) {
@@ -428,11 +436,12 @@
                 return;
             }
 
-            const foods = ['vegetarian', 'mutton', 'chicken'];
+            const foods = ['vegetarian', 'mutton', 'chicken', 'andakari'];
             const colors = {
                 vegetarian: '#28a745',
                 mutton: '#dc3545',
-                chicken: '#ffc107'
+                chicken: '#ffc107',
+                andakari: '#997b03'
             };
 
             foods.forEach(food => {
